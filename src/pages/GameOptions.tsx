@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useGame } from "../contexts/GameContext";
 import { Settings, ArrowLeft, ChevronLeft, ChevronRight, User, MonitorSmartphone } from "lucide-react";
@@ -8,7 +7,6 @@ const GameOptions: React.FC = () => {
   const { settings, updateSettings, setShowSettings, startGame } = useGame();
   const navigate = useNavigate();
   
-  // Player types (human or computer)
   const [playerTypes, setPlayerTypes] = useState<("human" | "computer")[]>(
     Array(settings.playerCount).fill("human").map((type, i) => i === 0 ? "human" : "computer")
   );
@@ -18,7 +16,6 @@ const GameOptions: React.FC = () => {
   const boardSizes = ["3x2", "5x4", "8x6", "11x9"];
   const themes = ["default"]; // More themes can be added later
   
-  // Helper to get next or previous item from array
   const getAdjacentValue = <T extends unknown>(
     array: T[], 
     current: T, 
@@ -34,21 +31,17 @@ const GameOptions: React.FC = () => {
     }
   };
   
-  // Update player count and resize player types array
   const updatePlayerCount = (newCount: number) => {
     updateSettings({ playerCount: newCount as 2 | 3 | 4 });
     setPlayerTypes(prev => {
       if (newCount > prev.length) {
-        // Add computer players
         return [...prev, ...Array(newCount - prev.length).fill("computer")];
       } else {
-        // Remove excess players
         return prev.slice(0, newCount);
       }
     });
   };
   
-  // Toggle player type (human/computer)
   const togglePlayerType = (index: number) => {
     setPlayerTypes(prev => {
       const newTypes = [...prev];
@@ -57,7 +50,6 @@ const GameOptions: React.FC = () => {
     });
   };
   
-  // Start game with current settings
   const handleStartGame = () => {
     startGame();
     navigate("/game");
@@ -65,7 +57,6 @@ const GameOptions: React.FC = () => {
 
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-4">
-      {/* Background with wooden texture */}
       <div 
         className="absolute inset-0 z-0" 
         style={{ 
@@ -75,7 +66,6 @@ const GameOptions: React.FC = () => {
         }} 
       />
       
-      {/* Back and Settings buttons */}
       <div className="absolute top-4 left-4 right-4 flex justify-between z-20">
         <button
           className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
@@ -92,16 +82,14 @@ const GameOptions: React.FC = () => {
         </button>
       </div>
       
-      {/* Options Panel */}
       <div className="relative z-10 max-w-md w-full">
         <h2 className="text-4xl font-bold text-center mb-4">OPTIONS</h2>
         
-        {/* Player Count Selector */}
         <div className="mb-6">
           <h3 className="text-xl font-semibold text-center mb-2">Choose Players</h3>
           <div className="flex items-center justify-center">
             <button 
-              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
+              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
               onClick={() => updatePlayerCount(
                 getAdjacentValue(playerCounts, settings.playerCount, "prev")
               )}
@@ -114,7 +102,7 @@ const GameOptions: React.FC = () => {
             </div>
             
             <button 
-              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
+              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
               onClick={() => updatePlayerCount(
                 getAdjacentValue(playerCounts, settings.playerCount, "next")
               )}
@@ -123,29 +111,32 @@ const GameOptions: React.FC = () => {
             </button>
           </div>
           
-          {/* Player Type Selection */}
-          <div className="flex justify-center mt-2">
+          <div className="flex justify-center gap-2 mt-4">
             {playerTypes.map((type, index) => (
               <button
                 key={index}
-                className={`mx-1 p-2 rounded-lg ${
-                  type === "human" ? "bg-red-500" : "bg-blue-500"
-                } text-white`}
                 onClick={() => togglePlayerType(index)}
+                className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${
+                  type === "human" ? "bg-red-500 hover:bg-red-600" : "bg-blue-500 hover:bg-blue-600"
+                }`}
+                title={`Click to change Player ${index + 1} type`}
               >
-                {type === "human" ? <User size={24} /> : <MonitorSmartphone size={24} />}
+                {type === "human" ? (
+                  <User className="text-white" size={28} />
+                ) : (
+                  <MonitorSmartphone className="text-white" size={28} />
+                )}
               </button>
             ))}
           </div>
-          <p className="text-center text-sm mt-1">Press a color to change player types.</p>
+          <p className="text-center text-sm mt-2 text-gray-600">Tap an icon to change player type</p>
         </div>
         
-        {/* Computer Difficulty */}
         <div className="mb-6">
           <h3 className="text-xl font-semibold text-center mb-2">Computer Difficulty</h3>
           <div className="flex items-center justify-center">
             <button 
-              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
+              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
               onClick={() => updateSettings({
                 difficulty: getAdjacentValue(difficulties, settings.difficulty, "prev") as "easy" | "medium" | "hard" | "expert"
               })}
@@ -158,7 +149,7 @@ const GameOptions: React.FC = () => {
             </div>
             
             <button 
-              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
+              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
               onClick={() => updateSettings({
                 difficulty: getAdjacentValue(difficulties, settings.difficulty, "next") as "easy" | "medium" | "hard" | "expert"
               })}
@@ -168,12 +159,11 @@ const GameOptions: React.FC = () => {
           </div>
         </div>
         
-        {/* Board Size */}
         <div className="mb-6">
           <h3 className="text-xl font-semibold text-center mb-2">Board Size</h3>
           <div className="flex items-center justify-center">
             <button 
-              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
+              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
               onClick={() => updateSettings({
                 boardSize: getAdjacentValue(boardSizes, settings.boardSize, "prev") as "3x2" | "5x4" | "8x6" | "11x9"
               })}
@@ -186,7 +176,7 @@ const GameOptions: React.FC = () => {
             </div>
             
             <button 
-              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
+              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
               onClick={() => updateSettings({
                 boardSize: getAdjacentValue(boardSizes, settings.boardSize, "next") as "3x2" | "5x4" | "8x6" | "11x9"
               })}
@@ -196,12 +186,11 @@ const GameOptions: React.FC = () => {
           </div>
         </div>
         
-        {/* Theme */}
         <div className="mb-8">
           <h3 className="text-xl font-semibold text-center mb-2">Theme</h3>
           <div className="flex items-center justify-center">
             <button 
-              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
+              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
               onClick={() => updateSettings({
                 theme: getAdjacentValue(themes, settings.theme, "prev") as "default" | string
               })}
@@ -214,7 +203,7 @@ const GameOptions: React.FC = () => {
             </div>
             
             <button 
-              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
+              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
               onClick={() => updateSettings({
                 theme: getAdjacentValue(themes, settings.theme, "next") as "default" | string
               })}
@@ -224,7 +213,6 @@ const GameOptions: React.FC = () => {
           </div>
         </div>
         
-        {/* Start Button */}
         <button
           className="w-full py-4 bg-teal-500 text-white text-2xl font-bold rounded-full shadow-lg hover:bg-teal-600 transition-colors"
           onClick={handleStartGame}
@@ -233,7 +221,6 @@ const GameOptions: React.FC = () => {
         </button>
       </div>
       
-      {/* Game Board Decoration */}
       <div className="absolute bottom-4 w-80 h-20 opacity-50 z-0">
         <img 
           src="/lovable-uploads/46ba1fef-40b3-4c5c-93ff-158647cd9713.png" 
