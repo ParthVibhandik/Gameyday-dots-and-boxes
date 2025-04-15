@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGame } from "../contexts/GameContext";
 import GameBoard from "../components/GameBoard";
@@ -9,8 +9,8 @@ const GameScreen: React.FC = () => {
   const { gameState, setShowSettings, setShowMenu } = useGame();
   const navigate = useNavigate();
 
-  // If no game state, redirect to options
-  React.useEffect(() => {
+  // Redirect to options if no game state exists
+  useEffect(() => {
     if (!gameState) {
       navigate("/options");
     }
@@ -33,14 +33,14 @@ const GameScreen: React.FC = () => {
       {/* Menu and Settings buttons */}
       <div className="absolute top-4 left-4 right-4 flex justify-between z-20">
         <button
-          className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
+          className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
           onClick={() => setShowMenu(true)}
         >
           <List size={24} />
         </button>
         
         <button
-          className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
+          className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
           onClick={() => setShowSettings(true)}
         >
           <Settings size={24} />

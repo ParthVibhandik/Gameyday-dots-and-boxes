@@ -1,7 +1,7 @@
 
 import React from "react";
 import { useGame } from "../contexts/GameContext";
-import { Settings, X } from "lucide-react";
+import { X } from "lucide-react";
 
 const GameSettingsModal: React.FC = () => {
   const { settings, updateSettings, showSettings, setShowSettings } = useGame();
@@ -69,11 +69,12 @@ const GameSettingsModal: React.FC = () => {
               </div>
               
               {/* Return to Site (placeholder) */}
-              <button
-                className="w-full text-xl py-3 text-left border-t border-gray-700"
+              <a 
+                href="/"
+                className="w-full text-xl py-3 text-left border-t border-gray-700 block hover:bg-gray-700 px-6 transition-colors"
               >
                 Return to Gametable Site
-              </button>
+              </a>
             </div>
           </div>
         </div>

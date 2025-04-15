@@ -2,6 +2,7 @@
 import React from "react";
 import { useGame } from "../contexts/GameContext";
 import { Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const MainMenu: React.FC = () => {
   const { setShowSettings } = useGame();
@@ -58,13 +59,16 @@ const MainMenu: React.FC = () => {
       
       {/* Main Menu Buttons */}
       <div className="z-10 w-72 flex flex-col gap-3">
-        <a href="/options" className="w-full">
+        <Link to="/options" className="w-full">
           <button className="w-full py-4 bg-teal-500 text-white text-2xl font-bold rounded-full shadow-lg hover:bg-teal-600 transition-colors">
             Play Game
           </button>
-        </a>
+        </Link>
         
-        <button className="w-full py-4 bg-teal-500 text-white text-2xl font-bold rounded-full shadow-lg hover:bg-teal-600 transition-colors">
+        <button
+          onClick={() => window.close()}
+          className="w-full py-4 bg-teal-500 text-white text-2xl font-bold rounded-full shadow-lg hover:bg-teal-600 transition-colors"
+        >
           Exit
         </button>
       </div>

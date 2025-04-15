@@ -1,10 +1,22 @@
 
 import React from "react";
 import { useGame } from "../contexts/GameContext";
+import { useNavigate } from "react-router-dom";
 import { X } from "lucide-react";
 
 const GameMenuModal: React.FC = () => {
   const { showMenu, setShowMenu, resetGame, exitToMainMenu } = useGame();
+  const navigate = useNavigate();
+
+  const handleReset = () => {
+    resetGame();
+    setShowMenu(false);
+  };
+
+  const handleExit = () => {
+    exitToMainMenu();
+    navigate("/main");
+  };
 
   return (
     showMenu && (
@@ -27,7 +39,7 @@ const GameMenuModal: React.FC = () => {
               {/* Start Game Over */}
               <button
                 className="w-full text-left text-xl py-4 px-6 hover:bg-gray-700 transition-colors"
-                onClick={resetGame}
+                onClick={handleReset}
               >
                 Start Game Over
               </button>
@@ -35,7 +47,7 @@ const GameMenuModal: React.FC = () => {
               {/* Exit to Main Menu */}
               <button
                 className="w-full text-left text-xl py-4 px-6 border-t border-gray-700 hover:bg-gray-700 transition-colors"
-                onClick={exitToMainMenu}
+                onClick={handleExit}
               >
                 Exit to Main Menu
               </button>
