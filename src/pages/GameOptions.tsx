@@ -14,7 +14,7 @@ const GameOptions: React.FC = () => {
   const playerCounts = [2, 3, 4];
   const difficulties = ["easy", "medium", "hard", "expert"];
   const boardSizes = ["3x2", "5x4", "8x6", "11x9"];
-  const themes = ["default"]; // More themes can be added later
+  const themes = ["classic", "modern", "retro"]; // Updated themes list
   
   const getAdjacentValue = <T extends unknown>(
     array: T[], 
@@ -82,7 +82,7 @@ const GameOptions: React.FC = () => {
         </button>
       </div>
       
-      <div className="relative z-10 max-w-md w-full">
+      <div className="relative z-10 max-w-md w-full space-y-8">
         <h2 className="text-4xl font-bold text-center mb-4">OPTIONS</h2>
         
         <div className="mb-6">
@@ -188,33 +188,33 @@ const GameOptions: React.FC = () => {
         
         <div className="mb-8">
           <h3 className="text-xl font-semibold text-center mb-2">Theme</h3>
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center gap-4">
             <button 
-              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
+              className="w-12 h-12 bg-[#00e5ff] rounded-lg flex items-center justify-center text-white hover:bg-[#00c8e6] transition-colors"
               onClick={() => updateSettings({
-                theme: getAdjacentValue(themes, settings.theme, "prev") as "default" | string
+                theme: getAdjacentValue(themes, settings.theme, "prev") as string
               })}
             >
-              <ChevronLeft size={24} />
+              <ChevronLeft size={32} />
             </button>
             
-            <div className="px-8 py-2 mx-2 bg-white rounded-lg text-center text-xl font-medium capitalize">
-              {settings.theme}
+            <div className="px-12 py-3 bg-white rounded-lg text-center text-2xl font-medium min-w-[200px] shadow-md">
+              {settings.theme.charAt(0).toUpperCase() + settings.theme.slice(1)}
             </div>
             
             <button 
-              className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
+              className="w-12 h-12 bg-[#00e5ff] rounded-lg flex items-center justify-center text-white hover:bg-[#00c8e6] transition-colors"
               onClick={() => updateSettings({
-                theme: getAdjacentValue(themes, settings.theme, "next") as "default" | string
+                theme: getAdjacentValue(themes, settings.theme, "next") as string
               })}
             >
-              <ChevronRight size={24} />
+              <ChevronRight size={32} />
             </button>
           </div>
         </div>
         
         <button
-          className="w-full py-4 bg-teal-500 text-white text-2xl font-bold rounded-full shadow-lg hover:bg-teal-600 transition-colors"
+          className="w-full py-4 bg-[#00e5b0] text-white text-2xl font-bold rounded-full shadow-lg hover:bg-[#00c89e] transition-colors transform hover:scale-105 duration-200"
           onClick={handleStartGame}
         >
           Start
