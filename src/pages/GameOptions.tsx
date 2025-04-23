@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useGame } from "../contexts/GameContext";
-import { Settings, ArrowLeft, ChevronLeft, ChevronRight, User, MonitorSmartphone } from "lucide-react";
+import { Settings, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { User, Computer } from "lucide-react";
 
 const GameOptions: React.FC = () => {
   const { settings, updateSettings, setShowSettings, startGame } = useGame();
@@ -14,7 +15,7 @@ const GameOptions: React.FC = () => {
   const playerCounts = [2, 3, 4];
   const difficulties = ["easy", "medium", "hard", "expert"];
   const boardSizes = ["3x2", "5x4", "8x6", "11x9"];
-  const themes = ["classic", "modern", "retro"]; // Updated themes list
+  const themes = ["classic", "modern", "retro"];
   
   const getAdjacentValue = <T extends unknown>(
     array: T[], 
@@ -23,7 +24,6 @@ const GameOptions: React.FC = () => {
   ): T => {
     const currentIndex = array.indexOf(current);
     if (currentIndex === -1) return array[0];
-    
     if (direction === "next") {
       return array[(currentIndex + 1) % array.length];
     } else {
@@ -73,7 +73,6 @@ const GameOptions: React.FC = () => {
         >
           <ArrowLeft size={24} />
         </button>
-        
         <button
           className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white"
           onClick={() => setShowSettings(true)}
@@ -96,11 +95,9 @@ const GameOptions: React.FC = () => {
             >
               <ChevronLeft size={24} />
             </button>
-            
             <div className="px-8 py-2 mx-2 bg-white rounded-lg text-center text-xl font-medium">
               {settings.playerCount} Players
             </div>
-            
             <button 
               className="w-12 h-12 bg-teal-500 rounded-full flex items-center justify-center text-white hover:bg-teal-600 transition-colors"
               onClick={() => updatePlayerCount(
@@ -110,21 +107,25 @@ const GameOptions: React.FC = () => {
               <ChevronRight size={24} />
             </button>
           </div>
-          
           <div className="flex justify-center gap-2 mt-4">
             {playerTypes.map((type, index) => (
               <button
                 key={index}
                 onClick={() => togglePlayerType(index)}
-                className={`w-12 h-12 rounded-lg flex items-center justify-center transition-colors ${
-                  type === "human" ? "bg-red-500 hover:bg-red-600" : "bg-blue-500 hover:bg-blue-600"
-                }`}
+                className={`
+                  w-12 h-12 rounded-lg flex items-center justify-center transition-colors
+                  ${type === "human" ? "bg-[#ea384c] hover:bg-[#ee263a]" : "bg-[#3b82f6] hover:bg-[#2563eb]"}
+                `}
+                style={{
+                  boxShadow: '0 2px 6px 0 rgba(60,60,80,0.08)',
+                  border: 'none'
+                }}
                 title={`Click to change Player ${index + 1} type`}
               >
                 {type === "human" ? (
                   <User className="text-white" size={28} />
                 ) : (
-                  <MonitorSmartphone className="text-white" size={28} />
+                  <Computer className="text-white" size={28} />
                 )}
               </button>
             ))}
