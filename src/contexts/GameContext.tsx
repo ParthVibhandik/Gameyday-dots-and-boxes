@@ -1,6 +1,6 @@
-
-import React, { createContext, useContext, useState } from "react";
-import { GameSettings, GameState, Line, Box, Player, BoardSize } from "../types";
+import React, { createContext, useContext, useState, useRef, useEffect } from "react";
+import { GameSettings, GameState, Line, Box, Player, BoardSize, PlayerType } from "../types";
+import { getComputerMove } from "../utils/computerPlayer";
 
 // Default game settings
 const defaultSettings: GameSettings = {
@@ -67,11 +67,11 @@ const initializeBoard = (boardSizeStr: string): { lines: Line[]; boxes: Box[] } 
 };
 
 // Create players based on player count
-const createPlayers = (count: number): Player[] => {
+const createPlayers = (count: number, types?: PlayerType[]): Player[] => {
   const colors = ["#f87171", "#3b82f6", "#10b981", "#f59e0b"];
   return Array.from({ length: count }).map((_, i) => ({
     id: i,
-    type: i === 0 ? "human" : "computer",
+    type: types?.[i] || (i === 0 ? "human" : "computer"),
     color: colors[i % colors.length],
     score: 0,
   }));
@@ -81,7 +81,7 @@ interface GameContextType {
   settings: GameSettings;
   updateSettings: (settings: Partial<GameSettings>) => void;
   gameState: GameState | null;
-  startGame: () => void;
+  startGame: (types?: PlayerType[]) => void;
   drawLine: (lineId: string) => void;
   resetGame: () => void;
   exitToMainMenu: () => void;
@@ -90,6 +90,8 @@ interface GameContextType {
   showMenu: boolean;
   setShowMenu: (show: boolean) => void;
   inGame: boolean;
+  playerTypes: PlayerType[];
+  setPlayerTypes: (types: PlayerType[]) => void;
 }
 
 const GameContext = createContext<GameContextType | undefined>(undefined);
@@ -101,14 +103,33 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [showMenu, setShowMenu] = useState(false);
   const [inGame, setInGame] = useState(false);
 
+  // Save playerTypes in context for options selection
+  const [playerTypes, setPlayerTypes] = useState<PlayerType[]>(
+    Array(defaultSettings.playerCount)
+      .fill("human")
+      .map((t, i) => (i === 0 ? "human" : "computer"))
+  );
+
+  // Will be set to true in drawLine if computer needs to move next
+  const aiMoveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Clean up on unmount
+  useEffect(() => {
+    return () => {
+      if (aiMoveTimeoutRef.current) {
+        clearTimeout(aiMoveTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const updateSettings = (newSettings: Partial<GameSettings>) => {
     setSettings((prev) => ({ ...prev, ...newSettings }));
   };
 
-  const startGame = () => {
+  // Main start game function to accept playerTypes
+  const startGame = (types?: PlayerType[]) => {
     const { lines, boxes } = initializeBoard(settings.boardSize);
-    const players = createPlayers(settings.playerCount);
-    
+    const players = createPlayers(settings.playerCount, types || playerTypes);
     setGameState({
       players,
       currentPlayerId: 0,
@@ -117,7 +138,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       boardSize: parseBoardSize(settings.boardSize),
       gameOver: false,
     });
-    
     setInGame(true);
   };
 
@@ -129,20 +149,14 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   ): { updatedBoxes: Box[], boxCompleted: boolean } => {
     const updatedBoxes = [...boxes];
     const line = lines.find((l) => l.id === lineId);
-    
     if (!line) return { updatedBoxes, boxCompleted: false };
-
     let boxCompleted = false;
-    
     if (line.isHorizontal) {
-      // Check box above if not top row
       if (line.row > 0) {
         const boxAbove = updatedBoxes.find(
           (b) => b.row === line.row - 1 && b.col === line.col
         );
-        
         if (boxAbove && !boxAbove.completed) {
-          // Check if all lines around this box are drawn
           const topLine = lines.find(
             (l) => l.isHorizontal && l.row === line.row - 1 && l.col === line.col
           );
@@ -152,7 +166,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const rightLine = lines.find(
             (l) => !l.isHorizontal && l.row === line.row - 1 && l.col === line.col + 1
           );
-          
           if (
             topLine?.drawn &&
             leftLine?.drawn &&
@@ -164,14 +177,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       }
-      
-      // Check box below
       const boxBelow = updatedBoxes.find(
         (b) => b.row === line.row && b.col === line.col
       );
-      
       if (boxBelow && !boxBelow.completed) {
-        // Check if all lines around this box are drawn
         const bottomLine = lines.find(
           (l) => l.isHorizontal && l.row === line.row + 1 && l.col === line.col
         );
@@ -181,7 +190,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const rightLine = lines.find(
           (l) => !l.isHorizontal && l.row === line.row && l.col === line.col + 1
         );
-        
         if (
           bottomLine?.drawn &&
           leftLine?.drawn &&
@@ -193,15 +201,11 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     } else {
-      // Vertical line
-      // Check box to the left if not leftmost column
       if (line.col > 0) {
         const boxLeft = updatedBoxes.find(
           (b) => b.row === line.row && b.col === line.col - 1
         );
-        
         if (boxLeft && !boxLeft.completed) {
-          // Check if all lines around this box are drawn
           const topLine = lines.find(
             (l) => l.isHorizontal && l.row === line.row && l.col === line.col - 1
           );
@@ -211,7 +215,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           const leftLine = lines.find(
             (l) => !l.isHorizontal && l.row === line.row && l.col === line.col - 1
           );
-          
           if (
             topLine?.drawn &&
             bottomLine?.drawn &&
@@ -223,14 +226,10 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
         }
       }
-      
-      // Check box to the right
       const boxRight = updatedBoxes.find(
         (b) => b.row === line.row && b.col === line.col
       );
-      
       if (boxRight && !boxRight.completed) {
-        // Check if all lines around this box are drawn
         const topLine = lines.find(
           (l) => l.isHorizontal && l.row === line.row && l.col === line.col
         );
@@ -240,7 +239,6 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const rightLine = lines.find(
           (l) => !l.isHorizontal && l.row === line.row && l.col === line.col + 1
         );
-        
         if (
           topLine?.drawn &&
           bottomLine?.drawn &&
@@ -252,25 +250,42 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     }
-    
     return { updatedBoxes, boxCompleted };
   };
 
-  const drawLine = (lineId: string) => {
-    if (!gameState) return;
-    
+  // Helper called after every move to maybe trigger AI move(s)
+  useEffect(() => {
+    if (!gameState || gameState.gameOver) return;
+
+    const currentPlayer = gameState.players[gameState.currentPlayerId];
+    if (currentPlayer.type === "computer") {
+      // Delay for realism
+      aiMoveTimeoutRef.current = setTimeout(() => {
+        const move = getComputerMove(gameState, settings.difficulty);
+        if (move) {
+          drawLine(move, true); // Pass a flag so it doesn't recurse
+        }
+      }, 600);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [gameState]); // re-run after every change
+
+  /**
+   * Draw a line, and after state is updated, if next player is computer,
+   * the useEffect above auto-triggers their move.
+   */
+  const drawLine = (lineId: string, skipAI?: boolean) => {
+    if (!gameState || gameState.gameOver) return;
     const currentPlayerId = gameState.currentPlayerId;
     const updatedLines = gameState.lines.map((line) =>
       line.id === lineId ? { ...line, drawn: true, playerId: currentPlayerId } : line
     );
-    
     const result = checkBoxCompletion(
       lineId, 
       updatedLines, 
       gameState.boxes,
       currentPlayerId
     );
-    
     // Update player scores
     const updatedPlayers = gameState.players.map((player) => {
       if (player.id === currentPlayerId) {
@@ -279,20 +294,17 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       return player;
     });
-    
     // Check if game is over
     const allBoxesCompleted = result.updatedBoxes.every((box) => box.completed);
-    
     let winner;
     if (allBoxesCompleted) {
       winner = [...updatedPlayers].sort((a, b) => b.score - a.score)[0];
     }
-    
     // Determine next player (current player gets another turn if they completed a box)
     const nextPlayerId = result.boxCompleted 
       ? currentPlayerId 
       : (currentPlayerId + 1) % gameState.players.length;
-    
+
     setGameState({
       ...gameState,
       lines: updatedLines,
@@ -305,7 +317,7 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const resetGame = () => {
-    startGame();
+    startGame(playerTypes);
     setShowMenu(false);
   };
 
@@ -330,6 +342,8 @@ export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children
         showMenu,
         setShowMenu,
         inGame,
+        playerTypes,
+        setPlayerTypes,
       }}
     >
       {children}

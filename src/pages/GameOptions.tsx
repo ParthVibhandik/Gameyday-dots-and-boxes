@@ -5,18 +5,16 @@ import { useNavigate } from "react-router-dom";
 import { User, Computer } from "lucide-react";
 
 const GameOptions: React.FC = () => {
-  const { settings, updateSettings, setShowSettings, startGame } = useGame();
+  const { settings, updateSettings, setShowSettings, startGame, playerTypes, setPlayerTypes } = useGame();
   const navigate = useNavigate();
-  
-  const [playerTypes, setPlayerTypes] = useState<("human" | "computer")[]>(
-    Array(settings.playerCount).fill("human").map((type, i) => i === 0 ? "human" : "computer")
-  );
   
   const playerCounts = [2, 3, 4];
   const difficulties = ["easy", "medium", "hard", "expert"];
   const boardSizes = ["3x2", "5x4", "8x6", "11x9"];
   const themes = ["classic", "modern", "retro"];
   
+  const localPlayerTypes = playerTypes.slice();
+
   const getAdjacentValue = <T extends unknown>(
     array: T[], 
     current: T, 
@@ -30,7 +28,7 @@ const GameOptions: React.FC = () => {
       return array[(currentIndex - 1 + array.length) % array.length];
     }
   };
-  
+
   const updatePlayerCount = (newCount: number) => {
     updateSettings({ playerCount: newCount as 2 | 3 | 4 });
     setPlayerTypes(prev => {
@@ -41,17 +39,18 @@ const GameOptions: React.FC = () => {
       }
     });
   };
-  
+
   const togglePlayerType = (index: number) => {
     setPlayerTypes(prev => {
       const newTypes = [...prev];
       newTypes[index] = newTypes[index] === "human" ? "computer" : "human";
+      if (!newTypes.includes("human")) newTypes[0] = "human";
       return newTypes;
     });
   };
-  
+
   const handleStartGame = () => {
-    startGame();
+    startGame(playerTypes);
     navigate("/game");
   };
 
